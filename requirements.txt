@@ -1,0 +1,14 @@
+# Tested with Python 3.12
+# Exact versions used to produce the results in the paper.
+# (GraphRicciCurvature pins scipy < 1.14, hence scipy 1.13.1.)
+
+networkx==3.6.1
+GraphRicciCurvature==0.5.3.2
+numpy==2.2.6
+scipy==1.13.1
+matplotlib==3.10.8
+
+# Transitive dependencies of GraphRicciCurvature (installed automatically,
+# listed here for full reproducibility):
+POT==0.9.6.post1
+python-louvain==0.16
