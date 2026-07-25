@@ -12,9 +12,10 @@ Node layers (typed):
 
 Edges encode transactions/authorisation/queries between adjacent layers,
 plus the shared-infrastructure links (role->AUTH, endpoint->CORE) and a few
-cross-module integration links. The shared hubs (AUTH, CORE) and the
-cross-module links are the structural BRIDGES; everything inside a business
-module forms a comparatively dense community.
+cross-module integration links. The shared-hub and cross-module links define
+the model's structural-bridge classes; this label does not imply that every
+such edge is a graph-theoretic cut edge. Everything inside a business module
+forms a comparatively dense community.
 """
 import numpy as np, networkx as nx
 
@@ -51,9 +52,11 @@ def generate_mis(modules=("Sales","HR","Finance","Inventory"),
         # users -> role(s)  (hub-and-spoke at the role)
         for u in range(nu):
             un=f"U:{m}:{u}"; add(un,"U",m)
-            G.add_edge(un, rng.choice(roles))
+            primary_role = rng.choice(roles)
+            G.add_edge(un, primary_role)
             if rng.random()<p_second_role and roles_per_module>1:
-                G.add_edge(un, rng.choice(roles))
+                secondary_roles = [role for role in roles if role != primary_role]
+                G.add_edge(un, rng.choice(secondary_roles))
         # role -> AUTH  (every role authenticates centrally  => AUTH is a hub/bridge)
         for r in roles: G.add_edge(r,"AUTH")
         # role -> app servers (access grants)

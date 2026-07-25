@@ -10,7 +10,7 @@ Management Information System (MIS) transaction networks, together with the
 scripts that compute discrete **Ollivier-Ricci** curvature, **Forman-Ricci**
 curvature, **edge betweenness**, connectivity and spectral comparators. It also
 reproduces the randomized robustness, parameter-sensitivity, scaling, and
-external-validation analyses added during peer review.
+external-evaluation analyses added during peer review.
 
 ## Main result
 
@@ -23,9 +23,10 @@ instances, Ollivier-Ricci curvature separates:
   endpoint→shared core DB, and cross-module links), which have strongly
   negative curvature in the generated model.
 
-This sign separation is proved in closed form (Lemma 1 and Theorem 1 of the
-paper) and confirmed empirically here on a typed MIS model, across 40 randomized
-instances. External communication-backbone experiments compare curvature with
+The two canonical structures are analyzed in closed form (Lemma 1 and Theorem 1
+of the paper), and the corresponding edge classes are evaluated empirically on
+a typed MIS model across 40 randomized instances. External
+communication-backbone experiments compare curvature with
 edge betweenness, Forman curvature, local edge connectivity,
 algebraic-connectivity loss, and a normalized-Laplacian embedding. Negative
 curvature is a transport-neighborhood divergence signal; it is not claimed to
@@ -42,8 +43,9 @@ source venv/bin/activate        # on Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-> Note: `GraphRicciCurvature` pins `scipy < 1.14`; the exact versions in
-> `requirements.txt` reproduce the published numbers bit-for-bit.
+> Note: `GraphRicciCurvature` pins `scipy < 1.14`. The exact versions in
+> `requirements.txt` reproduce the deterministic graph and curvature analyses;
+> runtime and peak-memory measurements naturally depend on the host system.
 
 ## Usage
 
@@ -56,9 +58,9 @@ All scripts are deterministic (fixed seeds) and import the generator from
 | `python multigraph.py` | Robustness across 40 randomized instances (Table 3, Section 5.4) |
 | `python forman_compare.py` | Forman vs. Ollivier comparison statistics (Section 5.3) |
 | `python forman_fig.py` | Figure 4 (Forman vs. Ollivier scatter) |
-| `python revision_experiments.py` | Alpha sensitivity, 40-run inferential statistics, scaling measurements, public-backbone validation, Tables 3–6, and Figures 5–7 |
+| `python revision_experiments.py` | Alpha sensitivity, 40-run inferential statistics, scaling measurements, public-backbone evaluation, Tables 3–6, and Figures 5–7 |
 
-The revision outputs are written to `revision_outputs/`. External validation
+The revision outputs are written to `revision_outputs/`. External evaluation
 expects the Repetita checkout at `../external/Repetita/` relative to this
 repository. The paper records the analyzed Repetita commit.
 
@@ -86,7 +88,10 @@ application→endpoint calls, endpoint→table queries, endpoint→core-DB acces
 a few cross-module integration links. Each business module forms a dense
 community; the shared hubs and cross-module links form the sparse bridges. All
 parameters (module count, users per module, access probabilities, seed) are
-arguments of `generate_mis()`.
+arguments of `generate_mis()`. Every user receives one primary role; when the
+secondary-role trial succeeds, the second role is drawn from the remaining
+roles, so `p_second_role` is the probability of a genuinely distinct secondary
+assignment.
 
 ## Citation
 

@@ -38,7 +38,10 @@ def main():
 
     print(f"Network: {G.number_of_nodes()} nodes, {G.number_of_edges()} edges, "
           f"layers={dict(Counter(L.values()))}")
-    rows = sorted(((curv[e], e[0], e[1], etype(*e)) for e in G.edges()), key=lambda r: r[0])
+    rows = sorted(
+        ((curv[e], e[0], e[1], etype(*e)) for e in G.edges()),
+        key=lambda r: (r[0], str(r[1]), str(r[2])),
+    )
     print("\nTable 1 (top-6 most negative):")
     for i, (k, u, v, t) in enumerate(rows[:6], 1):
         print(f"  {i}. {k:+.3f}  [{t}]  {u} -- {v}")
@@ -82,7 +85,7 @@ def main():
     for i, t in enumerate(order):
         ax.scatter(byt[t], np.full(len(byt[t]), i+1)+jitter_rng.uniform(-.12,.12,len(byt[t])), s=14, color="#222", alpha=.5, zorder=3)
     ax.axvline(0, color="gray", ls="--", lw=.8); ax.set_yticks(range(1,6))
-    ax.set_yticklabels(["user-role\n(spoke)","intra-module","cross-module\n(bridge)","endpoint-coreDB\n(bridge)","role-AUTH\n(bridge)"], fontsize=8)
+    ax.set_yticklabels(["user-role\nedges","intra-module","cross-module\n(structural)","endpoint-coreDB\n(structural)","role-AUTH\n(structural)"], fontsize=8)
     ax.set_xlabel(r"Ollivier-Ricci curvature $\kappa$"); ax.grid(axis="x", alpha=.25)
     plt.tight_layout(); plt.savefig("mis_curvature_by_type.png", dpi=320, bbox_inches="tight"); plt.close()
 
@@ -90,8 +93,8 @@ def main():
     def isbridge(u, v): return etype(u, v) in ("role-AUTH","endpoint-coreDB","cross-module")
     br = np.array([isbridge(*e) for e in G.edges()])
     fig, ax = plt.subplots(figsize=(6.2, 4.4))
-    ax.scatter(b[~br], c[~br], s=24, color="#4393c3", edgecolors="#1a5276", linewidths=.3, label="module-internal edges", zorder=3)
-    ax.scatter(b[br], c[br], s=40, color="#d73027", edgecolors="#7b241c", linewidths=.4, marker="D", label="bridge edges", zorder=4)
+    ax.scatter(b[~br], c[~br], s=24, color="#4393c3", edgecolors="#1a5276", linewidths=.3, label="other edges", zorder=3)
+    ax.scatter(b[br], c[br], s=40, color="#d73027", edgecolors="#7b241c", linewidths=.4, marker="D", label="structural-bridge classes", zorder=4)
     ax.axhline(0, color="gray", ls="--", lw=.8)
     ax.set_xlabel("Edge betweenness centrality"); ax.set_ylabel(r"Ollivier-Ricci curvature $\kappa$")
     ax.set_title("Curvature vs. edge betweenness  (Spearman "+r"$\rho$"+f" = {rho:.2f})", fontsize=9.5)

@@ -6,7 +6,7 @@ This script adds:
 2. sensitivity to the lazy-random-walk parameter alpha;
 3. confidence intervals and paired non-parametric tests over 40 randomized
    MIS instances;
-4. external validation on five public communication-network topologies from
+4. external evaluation on five public communication-network topologies from
    the Internet Topology Zoo as distributed with Repetita; and
 5. comparisons with edge betweenness, Forman-Ricci curvature, local edge
    connectivity, algebraic-connectivity loss, and a spectral embedding.
@@ -195,6 +195,12 @@ def safe_spearman(x: list[float], y: list[float]) -> tuple[float, float]:
     return statistic, pvalue
 
 
+def edge_tie_key(edge: tuple[int, int]) -> tuple[int, int]:
+    """Canonical deterministic ordering for equal edge scores."""
+
+    return tuple(sorted(edge))
+
+
 def run_runtime_worker(payload: dict) -> None:
     modules = tuple(f"M{i + 1}" for i in range(payload["module_count"]))
     users = tuple(payload["users_per_module"] for _ in modules)
@@ -294,8 +300,12 @@ def runtime_scaling_experiment() -> list[dict]:
             "dmax": int(np.median([row["dmax"] for row in results])),
             "bmax": int(np.median([row["bmax"] for row in results])),
             "median_seconds": float(np.median(seconds)),
+            "q1_seconds": float(np.percentile(seconds, 25)),
+            "q3_seconds": float(np.percentile(seconds, 75)),
             "iqr_seconds": float(np.percentile(seconds, 75) - np.percentile(seconds, 25)),
             "median_peak_rss_mb": float(np.median(memory)),
+            "q1_peak_rss_mb": float(np.percentile(memory, 25)),
+            "q3_peak_rss_mb": float(np.percentile(memory, 75)),
             "iqr_peak_rss_mb": float(
                 np.percentile(memory, 75) - np.percentile(memory, 25)
             ),
@@ -331,8 +341,12 @@ def runtime_scaling_experiment() -> list[dict]:
             "dmax",
             "bmax",
             "median_seconds",
+            "q1_seconds",
+            "q3_seconds",
             "iqr_seconds",
             "median_peak_rss_mb",
+            "q1_peak_rss_mb",
+            "q3_peak_rss_mb",
             "iqr_peak_rss_mb",
         ],
         summary_rows,
@@ -360,12 +374,21 @@ def runtime_scaling_experiment() -> list[dict]:
     plt.rcParams.update({"font.size": 9, "axes.titlesize": 10})
     fig, axes = plt.subplots(1, 2, figsize=(8.4, 3.7))
     node_counts = np.array([row["n"] for row in summary_rows])
-    time_iqr = np.array([row["iqr_seconds"] for row in summary_rows]) / 2
-    mem_iqr = np.array([row["iqr_peak_rss_mb"] for row in summary_rows]) / 2
+    time_q1 = np.array([row["q1_seconds"] for row in summary_rows])
+    time_q3 = np.array([row["q3_seconds"] for row in summary_rows])
+    time_errors = np.vstack((times - time_q1, time_q3 - times))
+    median_memory = np.array(
+        [row["median_peak_rss_mb"] for row in summary_rows]
+    )
+    memory_q1 = np.array([row["q1_peak_rss_mb"] for row in summary_rows])
+    memory_q3 = np.array([row["q3_peak_rss_mb"] for row in summary_rows])
+    memory_errors = np.vstack(
+        (median_memory - memory_q1, memory_q3 - median_memory)
+    )
     axes[0].errorbar(
         node_counts,
         times,
-        yerr=time_iqr,
+        yerr=time_errors,
         marker="o",
         color="#2166ac",
         capsize=3,
@@ -377,8 +400,8 @@ def runtime_scaling_experiment() -> list[dict]:
     axes[0].grid(alpha=0.25)
     axes[1].errorbar(
         node_counts,
-        [row["median_peak_rss_mb"] for row in summary_rows],
-        yerr=mem_iqr,
+        median_memory,
+        yerr=memory_errors,
         marker="s",
         color="#b2182b",
         capsize=3,
@@ -409,7 +432,13 @@ def alpha_sensitivity_experiment() -> list[dict]:
     reference = [curvature_by_alpha[0.5][edge] for edge in edges]
     reference_top = {
         edge
-        for edge in sorted(edges, key=lambda edge: curvature_by_alpha[0.5][edge])[
+        for edge in sorted(
+            edges,
+            key=lambda edge: (
+                curvature_by_alpha[0.5][edge],
+                edge_tie_key(edge),
+            ),
+        )[
             : max(5, math.ceil(0.10 * len(edges)))
         ]
     }
@@ -421,7 +450,11 @@ def alpha_sensitivity_experiment() -> list[dict]:
         top = {
             edge
             for edge in sorted(
-                edges, key=lambda edge: curvature_by_alpha[alpha][edge]
+                edges,
+                key=lambda edge: (
+                    curvature_by_alpha[alpha][edge],
+                    edge_tie_key(edge),
+                ),
             )[: len(reference_top)]
         }
         grouped = {edge_type: [] for edge_type in EDGE_TYPES}
@@ -433,7 +466,11 @@ def alpha_sensitivity_experiment() -> list[dict]:
             [
                 classify_mis_edge(graph, *edge) in BRIDGE_TYPES
                 for edge in sorted(
-                    edges, key=lambda edge: curvature_by_alpha[alpha][edge]
+                    edges,
+                    key=lambda edge: (
+                        curvature_by_alpha[alpha][edge],
+                        edge_tie_key(edge),
+                    ),
                 )[:5]
             ]
         )
@@ -539,7 +576,10 @@ def robustness_statistics_experiment() -> list[dict]:
             [betweenness[edge] for edge in graph.edges()],
         )
         rhos.append(rho)
-        top_five = sorted(graph.edges(), key=lambda edge: curvature[edge])[:5]
+        top_five = sorted(
+            graph.edges(),
+            key=lambda edge: (curvature[edge], edge_tie_key(edge)),
+        )[:5]
         top5_precisions.append(
             np.mean(
                 [
@@ -689,25 +729,34 @@ def external_validation_experiment() -> list[dict]:
         )
 
         top_count = max(1, math.ceil(0.15 * len(edges)))
-        negative_top = set(sorted(edges, key=lambda edge: curvature[edge])[:top_count])
+        negative_top = set(
+            sorted(
+                edges,
+                key=lambda edge: (curvature[edge], edge_tie_key(edge)),
+            )[:top_count]
+        )
         metric_top_sets = {
             "betweenness": set(
-                sorted(edges, key=lambda edge: betweenness_map[edge], reverse=True)[
-                    :top_count
-                ]
+                sorted(
+                    edges,
+                    key=lambda edge: (
+                        -betweenness_map[edge],
+                        edge_tie_key(edge),
+                    ),
+                )[:top_count]
             ),
             "lambda2": set(
                 edge
                 for _, edge in sorted(
-                    zip(lambda2_loss, edges), key=lambda pair: pair[0], reverse=True
+                    zip(lambda2_loss, edges),
+                    key=lambda pair: (-pair[0], edge_tie_key(pair[1])),
                 )[:top_count]
             ),
             "embedding": set(
                 edge
                 for _, edge in sorted(
                     zip(embedding_distance, edges),
-                    key=lambda pair: pair[0],
-                    reverse=True,
+                    key=lambda pair: (-pair[0], edge_tie_key(pair[1])),
                 )[:top_count]
             ),
         }
