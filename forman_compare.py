@@ -1,3 +1,4 @@
+import ricci_compat  # noqa: F401  (installs the portable serial pool)
 import numpy as np, networkx as nx
 from collections import defaultdict
 from GraphRicciCurvature.OllivierRicci import OllivierRicci

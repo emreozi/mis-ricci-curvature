@@ -1,0 +1,5 @@
+Log-log regression of runtime on m*b_max^3*log(b_max):
+slope=0.3948
+intercept=-9.9579
+R_squared=0.9884
+p_value=0.000530947

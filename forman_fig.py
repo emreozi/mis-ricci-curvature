@@ -1,3 +1,4 @@
+import ricci_compat  # noqa: F401  (installs the portable serial pool)
 import numpy as np, networkx as nx, matplotlib; matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from GraphRicciCurvature.OllivierRicci import OllivierRicci
@@ -31,5 +32,5 @@ ax.set_xlabel(r"Ollivier-Ricci curvature $\kappa$ (non-local)")
 ax.set_ylabel(r"Forman-Ricci curvature $\mathbf{F}$ (local)")
 ax.set_title("Forman vs. Ollivier on the MIS model: Forman tracks degree and\nmis-ranks robust spokes below the genuine bridges",fontsize=9.5)
 ax.legend(fontsize=7.5,loc="lower right"); ax.grid(alpha=0.25,zorder=0)
-plt.tight_layout(); plt.savefig("forman_vs_ollivier.png",dpi=200,bbox_inches="tight"); plt.close()
+plt.tight_layout(); plt.savefig("forman_vs_ollivier.png",dpi=320,bbox_inches="tight"); plt.close()
 print("figure written")
