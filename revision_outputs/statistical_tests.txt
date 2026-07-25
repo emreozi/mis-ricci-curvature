@@ -1,9 +1,9 @@
 Repeated-measures tests over 40 randomized MIS instances
-Mean node count: 83.78 (SD 4.35)
-Friedman chi-square=154.160000, p=2.61289e-32
+Mean node count: 83.88 (SD 4.23)
+Friedman chi-square=156.880000, p=6.82307e-33
 Wilcoxon bridge vs intra-module: W=0.000000, one-sided p=9.09495e-13, Holm p=2.72848e-12
 Wilcoxon intra-module vs user-role: W=0.000000, one-sided p=9.09495e-13, Holm p=2.72848e-12
 Wilcoxon bridge vs degree-one spoke: W=0.000000, one-sided p=9.09495e-13, Holm p=2.72848e-12
-Spearman(kappa,EBC): mean=-0.699178, SD=0.050115, bootstrap 95% CI=[-0.714097,-0.683585]
+Spearman(kappa,EBC): mean=-0.715450, SD=0.044983, bootstrap 95% CI=[-0.728421,-0.701152]
 Mean top-5 bridge precision=1.000000
-Minimum degree-one spoke mean over runs=0.099491
+Minimum degree-one spoke mean over runs=0.093320
