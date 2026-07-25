@@ -1,3 +1,4 @@
+import ricci_compat  # noqa: F401  (installs the portable serial pool)
 import numpy as np, networkx as nx
 from collections import defaultdict
 from GraphRicciCurvature.OllivierRicci import OllivierRicci
@@ -31,6 +32,11 @@ for run in range(N_RUNS):
                    p_second_role=float(rng.uniform(0.15,0.35)),
                    p_core_access=float(rng.uniform(0.3,0.55)),
                    cross_links=int(rng.integers(2,5)), seed=seed)
+    # NetworKit's adapter can retain holes after the giant-component
+    # extraction. Consecutive labels keep the APSP matrix aligned with the
+    # edge indices while preserving all node and edge attributes.
+    G=nx.convert_node_labels_to_integers(G)
+    ricci_compat.clear_ricci_caches()
     o=OllivierRicci(G,alpha=0.5,method="OTD",verbose="ERROR"); o.compute_ricci_curvature()
     cls=classify(G,o)
     for t in types:
@@ -46,7 +52,13 @@ for run in range(N_RUNS):
         t={L[u],L[v]}; return ("AUTH" in t) or ("CORE" in t) or (L[u]=="E" and L[v]=="E" and M[u]!=M[v])
     edges=sorted(G.edges(),key=lambda e:o.G[e[0]][e[1]]["ricciCurvature"])
     top5_bridge_frac.append(np.mean([isbridge(*e) for e in edges[:5]]))
-    spoke_min.append(min(cls["user-role"]) if cls["user-role"] else np.nan)
+    degree_one_spokes=[]
+    for u,v in G.edges():
+        if L[u]=="U" and G.degree[u]==1:
+            degree_one_spokes.append(o.G[u][v]["ricciCurvature"])
+        elif L[v]=="U" and G.degree[v]==1:
+            degree_one_spokes.append(o.G[u][v]["ricciCurvature"])
+    spoke_min.append(min(degree_one_spokes) if degree_one_spokes else np.nan)
     sizes.append(G.number_of_nodes())
 
 print(f"Across {N_RUNS} randomized MIS instances (varying sizes/probabilities):")
@@ -56,7 +68,7 @@ for t in types:
     a=np.array(per_run_means[t]); print(f"  {t:18s}  {a.mean():+.3f} +- {a.std():.3f}")
 print(f"\n  Spearman(kappa,EBC): {np.mean(rhos):+.3f} +- {np.std(rhos):.3f}")
 print(f"  Fraction of top-5 most-negative edges that are bridges: {np.mean(top5_bridge_frac)*100:.0f}%")
-print(f"  Minimum user-role spoke curvature (should be >=0): min over runs = {np.nanmin(spoke_min):+.4f}")
+print(f"  Minimum degree-one user-role spoke curvature: min over runs = {np.nanmin(spoke_min):+.4f}")
 # sign-consistency: in what fraction of runs is mean(bridge class) < mean(intra) < mean(spoke)?
 ok=0
 for i in range(len(per_run_means['role-AUTH'])):

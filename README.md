@@ -8,20 +8,28 @@ Reproducibility code for the paper:
 The repository contains a generative model of role-based-access-control (RBAC)
 Management Information System (MIS) transaction networks, together with the
 scripts that compute discrete **Ollivier-Ricci** curvature, **Forman-Ricci**
-curvature, and **edge betweenness centrality**, and that reproduce every figure
-and table in the paper.
+curvature, **edge betweenness**, connectivity and spectral comparators. It also
+reproduces the randomized robustness, parameter-sensitivity, scaling, and
+external-validation analyses added during peer review.
 
 ## Main result
 
-The discrete Ollivier-Ricci curvature cleanly separates the two canonical
-sub-structures of a scale-free MIS:
+On the canonical structures proved in the paper and on the generated MIS
+instances, Ollivier-Ricci curvature separates:
 
-* **hub-to-leaf spokes** (e.g. user→role) have **non-negative** curvature — they are robust;
-* **inter-hub bridges** (role→authentication server, endpoint→shared core DB, cross-module links) have **strongly negative** curvature — they are the genuine structural bottlenecks.
+* **degree-one hub-to-leaf spokes** (e.g. a singly assigned user→role edge),
+  which have **non-negative** curvature; and
+* predefined **structural-bridge classes** (role→authentication server,
+  endpoint→shared core DB, and cross-module links), which have strongly
+  negative curvature in the generated model.
 
 This sign separation is proved in closed form (Lemma 1 and Theorem 1 of the
 paper) and confirmed empirically here on a typed MIS model, across 40 randomized
-instances, and against both edge betweenness and Forman-Ricci curvature.
+instances. External communication-backbone experiments compare curvature with
+edge betweenness, Forman curvature, local edge connectivity,
+algebraic-connectivity loss, and a normalized-Laplacian embedding. Negative
+curvature is a transport-neighborhood divergence signal; it is not claimed to
+be a universal cut-edge test.
 
 ## Requirements
 
@@ -44,12 +52,15 @@ All scripts are deterministic (fixed seeds) and import the generator from
 
 | Command | Reproduces |
 |---|---|
-| `python reproduce_mis.py` | Table 1, Table 2 (means), Figures 1–3, and the curvature/betweenness statistics |
-| `python multigraph.py` | Robustness across 40 randomized instances (Table 2, Section 6.4) |
-| `python forman_compare.py` | Forman vs. Ollivier comparison statistics (Section 6.3) |
+| `python reproduce_mis.py` | Main 82-node MIS realization, Table 2, Figures 1–3, and curvature/betweenness statistics |
+| `python multigraph.py` | Robustness across 40 randomized instances (Table 3, Section 5.4) |
+| `python forman_compare.py` | Forman vs. Ollivier comparison statistics (Section 5.3) |
 | `python forman_fig.py` | Figure 4 (Forman vs. Ollivier scatter) |
+| `python revision_experiments.py` | Alpha sensitivity, 40-run inferential statistics, scaling measurements, public-backbone validation, Tables 3–6, and Figures 5–7 |
 
-Figures are written as PNG files into the working directory.
+The revision outputs are written to `revision_outputs/`. External validation
+expects the Repetita checkout at `../external/Repetita/` relative to this
+repository. The paper records the analyzed Repetita commit.
 
 ## Files
 
@@ -60,6 +71,9 @@ Figures are written as PNG files into the working directory.
 | `multigraph.py` | Sign-separation robustness over many randomized instances |
 | `forman_compare.py` | Forman-Ricci vs. Ollivier-Ricci numerical comparison |
 | `forman_fig.py` | Forman vs. Ollivier scatter plot (Figure 4) |
+| `revision_experiments.py` | Sensitivity, statistics, scaling, and external-network experiments |
+| `ricci_compat.py` | Deterministic single-worker compatibility and cache reset helpers |
+| `revision_outputs/` | CSV summaries, statistical-test output, and revision figures |
 | `requirements.txt` | Pinned dependencies |
 
 ## The model in one paragraph
