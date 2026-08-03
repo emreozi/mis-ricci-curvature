@@ -3,7 +3,11 @@
 Reproducibility code for the paper:
 
 > **Discrete Ricci Curvature on Complex Network Topologies: An Application to Management Information System Networks**
-> Emre Öztürk, *Mathematics* (MDPI), 2026.
+> Emre Öztürk, *Mathematics* **2026**, *14*(15), 2760.  
+> [https://doi.org/10.3390/math14152760](https://doi.org/10.3390/math14152760)
+
+Permanent reproducibility archive: **Zenodo v3.1** —
+[https://doi.org/10.5281/zenodo.21574868](https://doi.org/10.5281/zenodo.21574868).
 
 The repository contains a generative model of role-based-access-control (RBAC)
 Management Information System (MIS) transaction networks, together with the
@@ -97,6 +101,10 @@ assignment.
 
 If you use this code, please cite the paper:
 
+> Öztürk, E. Discrete Ricci Curvature on Complex Network Topologies: An
+> Application to Management Information System Networks. *Mathematics* **2026**,
+> *14*, 2760. [https://doi.org/10.3390/math14152760](https://doi.org/10.3390/math14152760)
+
 ```bibtex
 @article{Ozturk2026DiscreteRicciMIS,
   title   = {Discrete Ricci Curvature on Complex Network Topologies:
@@ -104,14 +112,13 @@ If you use this code, please cite the paper:
   author  = {{\"O}zt{\"u}rk, Emre},
   journal = {Mathematics},
   year    = {2026},
-  volume  = {},
-  number  = {},
-  pages   = {},
-  doi     = {}
+  volume  = {14},
+  number  = {15},
+  pages   = {2760},
+  doi     = {10.3390/math14152760},
+  url     = {https://doi.org/10.3390/math14152760}
 }
 ```
-
-(Fill in volume / number / pages / DOI once the paper is published.)
 
 ## License
 
